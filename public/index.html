@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Members</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    
+    <style>
+     @import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400&display=swap');
+
+        ::-webkit-scrollbar {
+    width: 12px; /* width of the scrollbar */
+}
+
+::-webkit-scrollbar-track {
+    background: #11002b; /* color of the track */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #68abc5; /* color of the thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #dac404; /* color of the thumb on hover */
+}
+
+        body {
+            font-family: 'Noto Kufi Arabic', sans-serif;
+            background-color: #335a81;
+            
+            box-sizing: border-box;
+        }
+.container_{
+margin: auto 30px !important;
+}
+        .card {
+            margin-left: 40px;
+            margin-bottom: 20px;
+            border-radius: 18px;
+            border-top-right-radius: 40px;
+            border-bottom-left-radius: 90px !important;
+            background-color: #5695f4;
+            width: 500px !important;
+            color: #fff;
+            border: 1px solid #00000057;
+    box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.813);
+   
+    transition: transform 0.3s ease; /* Add transition for transform */
+        }
+        .card:hover{
+            transform: scale(1.05); /* Scale the card slightly on hover */
+            background-color: #75acfe;
+    box-shadow: 1px 5px 7px 1px rgba(0, 0, 0, 0.726);
+        }
+
+        .card img {
+            border-radius: 50%;
+            border: 3px solid #fff;
+            box-shadow: 1px 10px 20px 1px rgba(25, 0, 0, 0.795),-1px -10px  20px 1px rgba(255, 255, 255, 0.845);
+             
+        }
+
+        .card-title {
+            margin-bottom: 0.5rem;
+            color: rgb(248, 255, 248);
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.44);
+        }
+        .card-subtitle{
+            color: rgb(0, 0, 0) !important;
+            font-weight: 600;
+        }
+        .roles-container span {
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .badge-secondary{
+            background-color: #11002b !important;
+        }
+
+        .modal-content {
+            border-radius: 20px;
+        }
+
+        .modal-header,
+        .modal-footer {
+            border: none;
+        }
+        .topTitle{
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        #loadingSpinner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+
+        .spinner-container {
+            background: white;
+            padding: 50px;
+            width: 400px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .spinner-border {
+            margin-bottom: 10px;
+        }
+
+        .d-none {
+            display: none;
+        }
+        .modern-search-input {
+        border-radius: 50px;
+        max-width: 50% !important;
+        margin-left: 25%;
+        padding: 10px 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid #ced4da;
+        transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
+    }
+
+    .modern-search-input:focus {
+        box-shadow: 0 0 15px rgba(0, 123, 255, 0.25);
+        border-color: #80bdff;
+    }
+
+    .input-group-text {
+        border-radius: 50px;
+        background-color: #ffffff;
+        border: none;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .input-group-text .fas {
+        color: #6c757d;
+    }
+    .badges-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .badges-container i {
+            font-size: 1.2rem;
+            color: #ffd700; /* Gold color for badges */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loadingSpinner" class="d-none">
+        <div class="spinner-container">
+          <h2 style="color: red; font-weight: 600; ">Loading ...</h2>
+            <i class="fas fa-spinner fa-pulse fa-3x"></i>
+        </div>
+    </div>
+    
+    <div class="container_">
+      
+        
+       <div class="topTitle">
+        <div id="guildInfo" class="text-center my-4"></div>
+
+        <h1 class="text-center my-4">أعضاء الدسكورد</h1>
+       </div>
+       <div class="input-group mb-4">
+        <input type="text" id="searchInput" class="form-control modern-search-input" placeholder="Search by name">
+        <div class="input-group-append">
+            <span class="input-group-text">
+                <i class="fas fa-search"></i>
+            </span>
+        </div>
+    </div>
+    
+    <div class="row" id="members"></div>
+
+        <!-- Role Modal -->
+        <div id="roleModal" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Select Role</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="roleList"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="saveRoleButton">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" tabindex="-1" role="dialog" id="messageModal">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Send Message</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <input type="hidden" id="messageMemberId">
+                  <textarea id="messageContent" class="form-control" rows="4" placeholder="Enter your message here..."></textarea>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary" onclick="sendMessage()">Send Message</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+
+
+        <!-- Edit Member Name Modal -->
+        <div id="editMemberModal" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Member Name</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" id="newNameInput" class="form-control" placeholder="New Name">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onclick="editMemberName()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        let selectedMemberId;
+        let actionType; // 'add' or 'remove'
+        let members = []; // To store all members
+        async function fetchGuildInfo() {
+            const response = await fetch('http://localhost:3000/guild-info');
+            const { guildName, memberCount } = await response.json();
+            const guildInfoDiv = document.getElementById('guildInfo');
+            guildInfoDiv.innerHTML = `<h2>${guildName}</h2><p>عدد الأعضاء: ${memberCount}</p>`;
+        }
+
+
+        function getPresenceIcon(presence) {
+    switch (presence) {
+        case 'متصل':
+            return '<i class="fas fa-circle text-success" title="Online"></i>';
+        case 'بالخارج':
+            return '<i class="fas fa-clock text-warning" title="Away"></i>';
+        case 'مشغول':
+            return '<i class="fas fa-minus-circle text-danger" title="Do Not Disturb"></i>';
+        case 'غير متصل':
+            return '<i class="fas fa-circle text-muted" title="Offline"></i>';
+        default:
+            return '<i class="fas fa-question-circle text-secondary" title="Unknown"></i>';
+    }
+}
+
+let membersData = [];
+
+function loadMembers() {
+    fetch('http://localhost:3000/members')
+        .then(response => response.json())
+        .then(data => {
+            membersData = data;
+            displayMembers(data);
+        })
+        .catch(error => console.error('Error fetching member data:', error));
+}
+
+    function displayMembers(members) {
+        const membersDiv = document.getElementById('members');
+        membersDiv.innerHTML = '';
+        members.forEach(member => {
+            const memberCard = document.createElement('div');
+            memberCard.classList.add('col-md-4');
+            memberCard.innerHTML = `
+                <div class="card">
+                    <div class="card-body text-center">
+                        <img src="${member.avatar}" alt="${member.username}" class="img-fluid mb-3" style="width: 100px; height: 100px;">
+                        <span>  ${member.isBooster ? '<i class="fas fa-gem"></i>' : ''}</span>
+                        <h5 class="card-title">${member.username}</h5>
+                        <p><span>ID: </span>${member.id} </p>
+                        <span><button class="btn btn-primary mb-3" onclick="showMessageModal('${member.id}')">Send Message</button></span>
+                    <h6 class="card-subtitle mb-2 text-muted">${member.nickname ? `(${member.nickname})` : ''}</h6>
+                    <div class="roles-container mb-3">
+                        ${member.roles.map(role => `<span class="badge badge-secondary">${role}</span>`).join('')}
+                    </div>
+                    <p>${getPresenceIcon(member.presence)} ${member.presence}</p>
+                    <div class="badges-container text-center">
+                                ${member.badges.map(badge => getBadgeIcon(badge)).join('')}
+                            </div>
+                    <p>Activity: ${member.activity}</p>
+                    <p>Joined: ${member.joinedAt}</p>
+                    <p class="text-center">Voice Channel: ${member.voiceChannel}</p>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-danger" onclick="banMember('${member.id}')">طرد</button>
+                            <button class="btn btn-warning" onclick="showEditModal('${member.id}')">تحرير اسم</button>
+                            <button class="btn btn-success" onclick="showRoleModal('${member.id}', 'add')">إضافة رتبة</button>
+                            <button class="btn btn-info" onclick="showRoleModal('${member.id}', 'remove')">إزالة رتبة</button>
+                            <button class="btn btn-dark" onclick="deleteMember('${member.id}')">حذف</button>
+                        </div>
+                       
+                    </div>
+                </div>
+            `;
+            membersDiv.appendChild(memberCard);
+        });
+    }
+    function getBadgeIcon(badge) {
+                switch (badge) {
+                    case 'Employee':
+                        return '<i class="fas fa-user-tie"></i>';
+                    case 'Partnered Server Owner':
+                        return '<i class="fas fa-handshake"></i>';
+                    case 'HypeSquad Events':
+                        return '<i class="fas fa-bullhorn"></i>';
+                    case 'Bug Hunter Level 1':
+                        return '<i class="fas fa-bug"></i>';
+                    case 'House of Bravery':
+                        return '<i class="fas fa-shield-alt"></i>';
+                    case 'House of Brilliance':
+                        return '<i class="fas fa-lightbulb"></i>';
+                    case 'House of Balance':
+                        return '<i class="fas fa-balance-scale"></i>';
+                    case 'Early Supporter':
+                        return '<i class="fas fa-heart"></i>';
+                    case 'Team User':
+                        return '<i class="fas fa-users"></i>';
+                    case 'System':
+                        return '<i class="fas fa-cogs"></i>';
+                    case 'Bug Hunter Level 2':
+                        return '<i class="fas fa-spider"></i>';
+                    case 'Verified Bot':
+                        return '<i class="fas fa-robot"></i>';
+                    case 'Early Verified Bot Developer':
+                        return '<i class="fas fa-code"></i>';
+                    default:
+                        return '';
+                }
+            }
+            function filterMembers() {
+                const searchInput = document.getElementById('searchInput').value.toLowerCase();
+                const filteredMembers = membersData.filter(member =>
+                    member.username.toLowerCase().includes(searchInput)
+                );
+                displayMembers(filteredMembers);
+            }
+
+            window.onload = loadMembers;
+
+    document.getElementById('searchInput').addEventListener('input', filterMembers);
+
+
+    function showMessageModal(memberId) {
+    document.getElementById('messageMemberId').value = memberId;
+    $('#messageModal').modal('show');
+}
+
+async function sendMessage() {
+    const memberId = document.getElementById('messageMemberId').value;
+    const messageContent = document.getElementById('messageContent').value;
+    const guildId = localStorage.getItem('guildId');
+
+    if (!messageContent) {
+        alert('Message content cannot be empty.');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:3000/send-message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({  memberId, message: messageContent })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert(result.message);
+            $('#messageModal').modal('hide');
+        } else {
+            alert(result.message);
+        }
+    } catch (error) {
+        console.error('Error sending message:', error);
+        alert('Error sending message.');
+    }
+}
+
+
+
+
+        async function fetchRoles() {
+            const response = await fetch('http://localhost:3000/roles');
+            const roles = await response.json();
+            const roleList = document.getElementById('roleList');
+            roleList.innerHTML = '';
+            roles.forEach(role => {
+                const roleItem = document.createElement('div');
+                roleItem.innerHTML = `
+                    <input type="radio" name="role" value="${role.id}" id="${role.id}">
+                    <label for="${role.id}">${role.name}</label>
+                `;
+                roleList.appendChild(roleItem);
+            });
+        }
+
+        async function showRoleModal(memberId, type) {
+    selectedMemberId = memberId;
+    actionType = type;
+    const response = await fetch(`http://localhost:3000/member-roles?memberId=${memberId}&action=${type}`);
+    const data = await response.json();
+    const roleList = document.getElementById('roleList');
+    roleList.innerHTML = '';
+    if (type === 'add') {
+        const { allRoles, memberRolesIds } = data;
+        allRoles.forEach(role => {
+            const checked = memberRolesIds.includes(role.id) ? 'checked' : '';
+            roleList.innerHTML += `
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="role" value="${role.id}" id="${role.id}" ${checked}>
+                    <label class="form-check-label" for="${role.id}">${role.name}</label>
+                </div>
+            `;
+        });
+    } else {
+        const { roles } = data;
+        roles.forEach(role => {
+            roleList.innerHTML += `
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="role" value="${role.id}" id="${role.id}" checked>
+                    <label class="form-check-label" for="${role.id}">${role.name}</label>
+                </div>
+            `;
+        });
+        // Uncheck all checkboxes
+        document.querySelectorAll('input[name="role"]').forEach(input => {
+            input.checked = false;
+        });
+    }
+    $('#roleModal').modal('show');
+}
+
+
+
+        function closeModal(modalId) {
+            $(`#${modalId}`).modal('hide');
+        }
+
+        document.getElementById('saveRoleButton').addEventListener('click', async () => {
+    const selectedRoles = [...document.querySelectorAll('input[name="role"]:checked')].map(input => input.value);
+    const endpoint = actionType === 'add' ? 'add-roles' : 'remove-roles'; // Adjust endpoint name
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    
+   
+
+    const response = await fetch(`http://localhost:3000/${endpoint}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ memberId: selectedMemberId, roleIds: selectedRoles })
+    });
+
+    
+
+    if (response.ok) {
+        alert(`Role ${actionType}ed successfully`);
+        closeModal('roleModal');
+         // Show the loading spinner
+    loadingSpinner.classList.remove('d-none');
+
+    setTimeout(() =>{
+    // Hide the loading spinner
+        loadingSpinner.classList.add('d-none');
+        },1000)
+        loadMembers();
+       
+    } else {
+        alert(`Failed to ${actionType} role`);
+    }
+});
+
+
+
+        async function modifyRole(memberId, roleId, action) {
+            const response = await fetch(`http://localhost:3000/${action}-role`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ memberId, roleId })
+            });
+            if (!response.ok) {
+                alert(`Failed to ${action} role`);
+            }
+        }
+
+        function showEditModal(memberId) {
+            selectedMemberId = memberId;
+            $('#editMemberModal').modal('show');
+        }
+
+        async function editMemberName() {
+            const newName = document.getElementById('newNameInput').value.trim();
+            if (newName !== '') {
+                const response = await fetch('http://localhost:3000/edit-member', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ memberId: selectedMemberId, newName })
+                });
+                if (response.ok) {
+                    alert('Member name updated');
+                    closeModal('editMemberModal');
+                    loadMembers();
+                } else {
+                    alert('Failed to update member name');
+                }
+            } else {
+                alert('Please enter a valid name');
+            }
+        }
+
+        async function banMember(memberId) {
+            const response = await fetch('http://localhost:3000/ban', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ memberId })
+            });
+            if (response.ok) {
+                alert('Member banned');
+                loadMembers();
+            } else {
+                alert('Failed to ban member');
+            }
+        }
+
+        async function deleteMember(memberId) {
+            const response = await fetch('http://localhost:3000/delete-member', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ memberId })
+            });
+            if (response.ok) {
+                alert('Member deleted');
+                loadMembers();
+            } else {
+                alert('Failed to delete member');
+            }
+        }
+
+        fetchGuildInfo();
+        // loadMembers();
+    </script>
+</body>
+
+</html>
